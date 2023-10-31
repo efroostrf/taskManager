@@ -76,7 +76,6 @@ addButton.onclick = function() { //создание таска
     }
 
     notes.push(newNote);
-    saveUserData();
     render();
     taskText.value = '';
 }
@@ -98,7 +97,6 @@ toDoElement.onclick = function(event) //отслеживание событий 
                 notes.splice(index,1);
 
             }
-            saveUserData();
         }
     render()
     }
@@ -126,7 +124,6 @@ toDoElement.onclick = function(event) //отслеживание событий 
 
 
         }
-        saveUserData();
         }
     render()
     }
@@ -145,7 +142,6 @@ toDoElement.onclick = function(event) //отслеживание событий 
         else if(status === 'back'){
             notes[index].status = 'inProgress';
         }
-        saveUserData();
         }
     render()
     }
