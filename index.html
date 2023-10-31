@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="dist/output.css">
+    <title>Task manager</title>
+</head>
+<body class="bg-slate-700 h-screen">
+    <header class="container mx-auto mt-16 bg-slate-400 w-1/6">
+        <h1 class="w-full text-center font-bold text-xl font-mono">Task manager</h1>
+    </header>
+
+    <main class="h-fit">
+        <div class="container flex mx-auto justify-center mt-8 space-x-3">
+            <input type="text" placeholder="Enter the task..." id="taskText">
+            <input class="w-10 border-2 border-cyan-600 font-bold bg-slate-300 hover:bg-cyan-600" type="button" value="Add" id="addButton">
+        </div>
+
+        <div class="container flex mx-auto justify-center mt-8 space-x-32">
+            <div class="w-1/4 h-fit">
+                <h2 class="w-full text-center bg-slate-300 font-bold font-mono border-b-4  border-cyan-600">To Do</h2>
+                <ul class="divide-y border-2" id="toDoElement">
+                   
+                </ul>
+            </div>
+
+            <div class="w-1/4  h-fit">
+                <h2 class="w-full text-center bg-slate-300 font-bold font-mono border-b-4  border-cyan-600">In progress</h2>
+                <ul class="divide-y border-2" id="inProgressElement">
+                   
+                </ul>
+                
+            </div>
+
+            <div class="w-1/4  h-fit">
+                <h2 class="w-full text-center bg-slate-300 font-bold font-mono border-b-4  border-cyan-600">Done</h2>
+                <ul class="divide-y border-2" id="doneElement">
+                   
+                </ul>
+            </div>
+        </div>
+    </main>
+    <footer class="h-10"></footer>
+    <script src="script.js"></script>
+</body>
+</html>
