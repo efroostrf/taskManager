@@ -1,15 +1,9 @@
-const addButton = document.getElementById('addButton'); //кнопка Add
-const taskText = document.getElementById('taskText'); //Поле для ввода 
-const toDoElement = document.getElementById('toDoElement'); //Список toDo
-const inProgressElement = document.getElementById('inProgressElement'); //Список inProgress
-const doneElement = document.getElementById('doneElement'); //Список note
+/******/
+// Вообще с вот этими вот функциями беда. Как минимум нужно их выносить в отдельный файл, но там будет капец с импортами, поэтому ладно.
+// Претензии к тебе нет если что))
 
-let notes = [];
-
-function getNoteTemplate(note, index){ //заготовка шаблона для вставки в докуммент
-    if (note.status==='toDo')
-    {
-        return `
+const createToDoElement = (note, index) => {
+    return `
         <li class="container flex">
         <span class="w-4/5 text-center py-3 font-bold border-r">${note.title}</span>
         <span class="container flex w-1/5 m-1">
@@ -17,9 +11,10 @@ function getNoteTemplate(note, index){ //заготовка шаблона дл�
             <input class="w-1/2 bg-red-600 border m-1 font-bold hover:bg-red-700" data-index="${index}" type="button" data-type="remove" value="x">
         </span>
         </li>`;
-    }
-    else if(note.status === 'inProgress'){
-        return `
+}
+
+const createInProgressElement = (note, index) => {
+    return `
         <li class="container flex">
         <span class="w-4/5 text-center py-3 font-bold border-r">${note.title}</span>
         <span class="container flex w-1/5 m-1">
@@ -29,9 +24,10 @@ function getNoteTemplate(note, index){ //заготовка шаблона дл�
 
         </span>
         </li>`;
-    }
-    else if(note.status === 'done'){
-        return `
+}
+
+const createDoneElement = (note, index) => {
+    return `
         <li class="container flex">
         <span class="w-4/5 text-center py-3 font-bold border-r">${note.title}</span>
         <span class="container flex w-1/5 m-1">
@@ -39,109 +35,82 @@ function getNoteTemplate(note, index){ //заготовка шаблона дл�
             <input class="w-1/2 bg-red-600 border m-1 font-bold hover:bg-red-700" data-index="${index}" type="button" data-type="remove" value="x">
         </span>
         </li>`;
-    }
+}
+/******/
+
+let notes = [];
+
+const addButton = document.getElementById('addButton'); //кнопка Add
+const taskTitleInput = document.getElementById('taskTitleInput'); //Поле для ввода 
+
+// Columns
+const toDoColumn = document.getElementById('toDoColumn'); //Список toDo
+const inProgressColumn = document.getElementById('inProgressColumn'); //Список inProgress
+const doneColumn = document.getElementById('doneColumn'); //Список note
+
+// Выносим в отдельную функцию чтобы упростить рендер
+const resetCols = () => {
+    toDoColumn.innerHTML = '';
+    inProgressColumn.innerHTML = '';
+    doneColumn.innerHTML = '';
+};
+
+// Простая функция которая помещает в один элемент другой элемент
+const insertElemToCol = (col, elem) => {
+    col.insertAdjacentHTML('beforeend', elem);
 }
 
-function render() { //прорисовка тасков по спискам
-    toDoElement.innerHTML = '';
-    inProgressElement.innerHTML = '';
-    doneElement.innerHTML = '';
+const render = () => {
+    resetCols();
 
-    for (let i = 0; i < notes.length; i++){
-        if(notes[i].status === 'toDo'){
-            console.log("to do")
-            toDoElement.insertAdjacentHTML('beforeend', getNoteTemplate(notes[i], i));
-        }
-        else if(notes[i].status === 'inProgress'){
-            console.log("in progress")
-            inProgressElement.insertAdjacentHTML('beforeend', getNoteTemplate(notes[i], i));
-        }
-        else if(notes[i].status === 'done'){
-            console.log('done')
-            doneElement.insertAdjacentHTML('beforeend', getNoteTemplate(notes[i], i));
-        }
-        else{
-            console.log(notes[i].status)
-        }
-    }
-}
+    notes.forEach((note, index) => {
+        if (note.status === 'toDo') insertElemToCol(toDoColumn, createToDoElement(note, index));
+        if (note.status === 'inProgress') insertElemToCol(inProgressColumn, createInProgressElement(note, index));
+        if (note.status === 'done') insertElemToCol(doneColumn, createDoneElement(note, index));
+
+        console.error("Note with unknown status", note, note.status);
+    });
+};
 
 addButton.onclick = function() { //создание таска
-    if(taskText.value.length === 0){
-        return;
-    }
+    if (taskTitleInput.value.length === 0) return;
+
     const newNote = {
-        title: taskText.value,
+        title: taskTitleInput.value,
         status: 'toDo',
     }
 
+    taskTitleInput.value = '';
     notes.push(newNote);
     render();
-    taskText.value = '';
 }
 
-toDoElement.onclick = function(event) //отслеживание событий в листе toDo
-    {
-    if (event.target.dataset.index)
-        {
-        const index = Number(event.target.dataset.index)
-        const type = event.target.dataset.type
-        
-        if (type === 'next')
-            {
-                notes[index].status = 'inProgress';
+// typesFunctions - обычный мап, в который мы передаём объект { название_тайпа: функция(индекс) }
+const handleColumnClick = (event, typesFunctions) => {
+    if (!event.target.dataset.index) return;
 
-            } 
-        else if (type === 'remove')
-            {
-                notes.splice(index,1);
+    const index = Number(event.target.dataset.index);
+    const type = event.target.dataset.type;
+    const functionToCall = typesFunctions?.[type];
 
-            }
-        }
-    render()
-    }
+    if (!functionToCall) return;
 
-    inProgressElement.onclick = function(event) //отслеживание событий в листе toDo
-    {
-    if (event.target.dataset.index)
-        {
-        const index = Number(event.target.dataset.index)
-        const status = event.target.dataset.type
-        
-        if (status === 'next')
-            {
-                notes[index].status = 'done';
+    typesFunctions[type]?.(index);
+    render();
+}
 
+toDoColumn.onclick = (event) => handleColumnClick(event, {
+    next: (index) => notes[index].status = 'inProgress',
+    remove: (index) => notes.splice(index, 1), 
+});
 
-            } 
-        else if (status === 'remove')
-            {
-                notes.splice(index,1);
+inProgressColumn.onclick = (event) => handleColumnClick(event, {
+    next: (index) => notes[index].status = 'done',
+    remove: (index) => notes.splice(index, 1),
+    back: (index) => notes[index].status = 'toDo',
+});
 
-            }
-        else if(status === 'back'){
-            notes[index].status = 'toDo';
-
-
-        }
-        }
-    render()
-    }
-
-    doneElement.onclick = function(event) //отслеживание событий в листе toDo
-    {
-    if (event.target.dataset.index)
-        {
-        const index = Number(event.target.dataset.index)
-        const status = event.target.dataset.type
-        
-        if (status === 'remove')
-            {
-                notes.splice(index,1);
-            }
-        else if(status === 'back'){
-            notes[index].status = 'inProgress';
-        }
-        }
-    render()
-    }
+doneColumn.onclick = (event) => handleColumnClick(event, {
+    remove: (index) => notes.splice(index, 1),
+    back: (index) => notes[index].status = 'inProgress',
+});
